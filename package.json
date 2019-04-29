@@ -1,0 +1,24 @@
+{
+  "name": "mbr-buffer",
+  "version": "0.0.1",
+  "description": "Extendable utilities for simple NodeJS buffer manipulations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadBrozzeR/buffer.git"
+  },
+  "keywords": [
+    "buffer",
+    "reader",
+    "writer"
+  ],
+  "author": "MadBrozzeR",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MadBrozzeR/buffer/issues"
+  },
+  "homepage": "https://github.com/MadBrozzeR/buffer#readme"
+}
