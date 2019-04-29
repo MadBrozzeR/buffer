@@ -40,8 +40,16 @@ Reader.prototype.read = function (length, encoding) {
 
   return this.buffer.toString(encoding || this.encoding, oldIndex, oldIndex + length);
 };
+Reader.prototype.slice = function (length) {
+  const oldIndex = this.shift(length);
+
+  return this.buffer.slice(oldIndex, oldIndex + length);
+}
 Reader.prototype.next = function (value, encoding) {
   return this.buffer.indexOf(value, this.index, encoding || this.encoding);
+};
+Reader.prototype.last = function (value, encoding) {
+  return this.buffer.lastIndexOf(value, undefined, encoding || this.encoding);
 };
 Reader.prototype.until = function (value, encoding) {
   return this.next(value, encoding) - this.index;
