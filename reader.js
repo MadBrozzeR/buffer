@@ -11,7 +11,7 @@ Reader.prototype.shift = function (length) {
 
   return oldIndex;
 }
-Reader.prototype.readInt = function (length, littleEndian = false, unsigned = false) {
+Reader.prototype.readInt = function (length = 1, littleEndian = false, unsigned = false) {
   let method;
 
   if (littleEndian) {
@@ -35,7 +35,7 @@ Reader.prototype.readUIntLE = function (length) {
   return this.readInt(length, true, true);
 };
 
-Reader.prototype.read = function (length, encoding) {
+Reader.prototype.read = function (length = 1, encoding) {
   const oldIndex = this.shift(length);
 
   return this.buffer.toString(encoding || this.encoding, oldIndex, oldIndex + length);
@@ -54,7 +54,7 @@ Reader.prototype.last = function (value, encoding) {
 Reader.prototype.until = function (value, encoding) {
   return this.next(value, encoding) - this.index;
 };
-Reader.prototype.skip = function (count) {
+Reader.prototype.skip = function (count = 1) {
   this.index += count;
 
   return this;
