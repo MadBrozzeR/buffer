@@ -17,14 +17,29 @@ BufferElement.prototype.writeTo = function (buffer) {
 
   value.value.copy(buffer, this.offset);
 }
+BufferElement.generator = function () {
+  const Constructor = this;
 
-function IntegerType (value, length, params = {}) {
+  return function (...args) {
+    return new Constructor(...args);
+  }
+}
+BufferElement.extend = function (func, valueOf) {
+  func.prototype = Object.create(this.prototype);
+  func.prototype.constructor = func;
+  func.extend = this.extend;
+  func.generator = this.generator;
+
+  valueOf && (func.prototype.valueOf = valueOf);
+
+  return func;
+}
+
+const IntegerType = BufferElement.extend(function IntegerType (value, length = 1, params = {}) {
   BufferElement.call(this, value, length);
   this.unsigned = params.unsigned || false;
   this.littleEndian = params.littleEndian || false;
-}
-IntegerType.prototype = Object.create(BufferElement.prototype);
-IntegerType.prototype.valueOf = function () {
+}, function () {
   const buffer = Buffer.allocUnsafe(this.length);
   let method;
 
@@ -35,26 +50,22 @@ IntegerType.prototype.valueOf = function () {
   }
   method.call(buffer, this.value, 0, this.length);
 
-  return BufferElement.prototype.valueOf(buffer);
-}
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
 
-function StringType (value, length, params = {}) {
+const StringType = BufferElement.extend(function StringType (value, length, params = {}) {
   this.encoding = params.encoding || UTF_8;
   BufferElement.call(this, value, length  || Buffer.byteLength(value, this.encoding));
-}
-StringType.prototype = Object.create(BufferElement.prototype);
-StringType.prototype.valueOf = function () {
+}, function () {
   const buffer = Buffer.alloc(this.length);
   buffer.write(this.value, this.encoding);
 
-  return BufferElement.prototype.valueOf(buffer);
-}
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
 
-function FlagsType (value, length) {
+const FlagsType = BufferElement.extend(function FlagsType (value, length = 1) {
   BufferElement.call(this, value, length);
-}
-FlagsType.prototype = Object.create(BufferElement.prototype);
-FlagsType.prototype.valueOf = function () {
+}, function () {
   const buffer = Buffer.allocUnsafe(this.length);
   let value = 0;
 
@@ -63,14 +74,12 @@ FlagsType.prototype.valueOf = function () {
   }
   buffer.writeUIntBE(value, 0, this.length);
 
-  return BufferElement.prototype.valueOf(buffer);
-}
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
 
-function BufferType (value, length) {
+const BufferType = BufferElement.extend(function BufferType (value, length) {
   BufferElement.call(this, value, length || value.length);
-}
-BufferType.prototype = Object.create(BufferElement.prototype);
-BufferType.prototype.valueOf = function () {
+}, function () {
   let buffer;
   if (this.value.length === this.length) {
     buffer = this.value;
@@ -79,23 +88,53 @@ BufferType.prototype.valueOf = function () {
     this.value.copy(buffer);
   }
 
-  return BufferElement.prototype.valueOf(buffer);
-}
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
 
-function IndexOfType (value, length, params) {
+const IndexOfType = IntegerType.extend(function IndexOfType (value, length = 1, params) {
   IntegerType.call(this, 0, length, params);
   this.element = value;
-}
-IndexOfType.prototype = Object.create(IntegerType.prototype);
-IndexOfType.prototype.valueOf = function () {
-  this.value = this.element.offset;
+}, function () {
+  this.value = this.element ? this.element.offset : 0;
   return IntegerType.prototype.valueOf.call(this);
+});
+
+const SizeOfType = IntegerType.extend(function SizeOfType (value, length = 1, params) {
+  IntegerType.call(this, 0, length, params);
+  this.element = value;
+}, function () {
+  this.value = this.element && this.element.length || 0;
+  return IntegerType.prototype.valueOf.call(this);
+});
+
+function Group (group) {
+  this.group = group;
+  this.size = 0;
+}
+Group.prototype.flatten = function (result = {value: [], length: 0}) {
+  this.offset = result.length;
+
+  for (let index = 0 ; index < this.group.length ; ++index) {
+    flatten(this.group[index], result);
+  }
+  this.length = result.length - this.offset;
+}
+Group.prototype.SizeOf = function (length, params) {
+  return new SizeOfType(this, length, params);
+}
+Group.prototype.IndexOf = function (length, params) {
+  return new IndexOfType(this, length, params);
+}
+Group.generator = function (group) {
+  return new Group(group);
 }
 
-function flaten (object, result = {value: [], length: 0}) {
-  if (object instanceof Array) {
+function flatten (object, result = {value: [], length: 0}) {
+  if (object instanceof Group) {
+    object.flatten(result);
+  } else if (object instanceof Array) {
     for (let index = 0 ; index < object.length ; ++index) {
-      flaten(object[index], result);
+      flatten(object[index], result);
     }
   } else if (object instanceof BufferElement) {
     result.value.push(object);
@@ -106,11 +145,11 @@ function flaten (object, result = {value: [], length: 0}) {
 }
 
 function make (object) {
-  const flatenedObject = flaten(object);
-  const result = Buffer.allocUnsafe(flatenedObject.length);
+  const flattenedObject = flatten(object);
+  const result = Buffer.allocUnsafe(flattenedObject.length);
 
-  for (let index = 0 ; index < flatenedObject.value.length ; ++index) {
-    flatenedObject.value[index].writeTo(result);
+  for (let index = 0 ; index < flattenedObject.value.length ; ++index) {
+    flattenedObject.value[index].writeTo(result);
   }
 
   return result;
@@ -124,11 +163,13 @@ function generator (className) {
 
 module.exports = {
   Element: BufferElement,
-  Integer: generator(IntegerType),
-  String: generator(StringType),
-  Buffer: generator(BufferType),
-  Flags: generator(FlagsType),
-  IndexOf: generator(IndexOfType),
+  Integer: IntegerType.generator(),
+  String: StringType.generator(),
+  Buffer: BufferType.generator(),
+  Flags: FlagsType.generator(),
+  IndexOf: IndexOfType.generator(),
+  SizeOf: SizeOfType.generator(),
+  Group: Group.generator,
 
   make: make
 };

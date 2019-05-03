@@ -90,8 +90,29 @@ Get byte count from current cursor position to next occurrence of `value`.
 
 Set of functions to write into new buffer. Unlike Reader, Writer is not a constructor.
 
+### Writer.Group
+`Writer.Group([elements]);`
+
+Create group of elements or nested groups. Explicitly stores it's offset and size, which can be obtained by
+`Writer.IndexOf` and `Writer.SizeOf`. Or by `group.IndexOf` and `group.SizeOf` which are essentially the same.
+
+It is still possible to use arrays instead of Groups, but in that case you won't have direct access to size and offset.
+You can use first element for offset and manually calculate size of all nested elements.
+
+*elements* - array of child elements or nested groups.
+
+Own methods:
+
+`group.SizeOf(length = 1, {unsigned = false, littleEndian = false});`
+
+Create reference to group size. Alias for `Writer.SizeOf`.
+
+`group.IndexOf(length = 1, {unsigned = false, littleEndian = false});`
+
+Create reference to group offset. Alias for `Writer.IndexOf`.
+
 ### Writer.Integer
-`Writer.Integer(value, length, {unsigned = false, littleEndian = false});`
+`Writer.Integer(value, length = 1, {unsigned = false, littleEndian = false});`
 
 Create integer element.
 
@@ -124,7 +145,7 @@ Create buffer element.
 *length* - byte length in new buffer.
 
 ### Writer.Flags
-`Writer.Flags([values], length);`
+`Writer.Flags([values], length = 1);`
 
 Create flags.
 
@@ -133,11 +154,24 @@ Create flags.
 *length* - byte length in new buffer.
 
 ### Writer.IndexOf
-`Writer.IndexOf(value, length, {unsigned = false, littleEndian = false});`
+`Writer.IndexOf(value, length = 1, {unsigned = false, littleEndian = false});`
 
 Create reference to element's offset.
 
-*value* - element to reference.
+*value* - element (or group) to reference.
+
+*length* - byte length in new buffer.
+
+*props.unsigned* - integer is unsigned.
+
+*props.littleEndian* - integer in little-endian format.
+
+### Writer.SizeOf
+`Writer.SizeOf(value, length = 1, {unsigned = false, littleEndian = false});`
+
+Create reference to element's size.
+
+*value* - element (or group) to reference.
 
 *length* - byte length in new buffer.
 
@@ -151,3 +185,39 @@ Create reference to element's offset.
 Create buffer from elements. Array may consist of elements or other arrays. Nesting is supported.
 
 *elements* - elements to convert into buffer.
+
+### Writer.Element.extend
+`Writer.Element.extend(constructor, valueOf);`
+
+Way to create your own elements for your project.
+
+*constructor* - constructor function to be extended.
+
+*valueOf* - function that explains how to compile your value into result buffer.
+
+Proper example:
+
+```
+const CustomElement = Writer.Element.extend(function (value, length, params) {
+  // Call default constructor to set value and reserved buffer length.
+  Writer.Element.call(this, value, length);
+
+  // Set all desired custom parameters.
+  this.params = params.
+}, function () {
+  // Make buffer you need.
+  const buffer = Buffer.alloc(this.length);
+
+  // Return an appropriate object.
+  return Writer.Element.valueOf.call(this, buffer);
+}).generator();
+
+const customElement = CustomElement('value', 10);
+```
+
+Calling to `.generator()` method at the end is not required, but it's a good way to avoid using
+`new` keyword before your custom element constructor. Otherwise element should be created like so:
+
+```
+const customElement = new CustomElement('value', 10);
+```
