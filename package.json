@@ -1,6 +1,6 @@
 {
   "name": "mbr-buffer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Extendable utilities for simple NodeJS buffer manipulations",
   "main": "index.js",
   "scripts": {

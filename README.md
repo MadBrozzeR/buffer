@@ -1,9 +1,6 @@
 # mbr-buffer
 Reading and writing Buffer operations
 
-Currently only Reader has been implemented. Planning on Writer implementation as soon as I can or have a demand to.
-Already have certain ideas on its case.
-
 My projects always have restrictions to not to use third party packages.
 Only the ones included in default NodeJS and my own other projects.
 This approach helps to make them really lightweight and fast.
@@ -33,6 +30,7 @@ Move cursor so certain position.
 Get index of last occurrence of `value`.
 
 *value* - value to search. Can be either string or buffer, or one-byte number (0 - 255).
+
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
 
 ### reader.next
@@ -41,6 +39,7 @@ Get index of last occurrence of `value`.
 Get index of next (after current cursor position) occurrence of `value`.
 
 *value* - value to search. Can be either string or buffer, or one-byte number (0 - 255).
+
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
 
 ### reader.read
@@ -84,4 +83,71 @@ Skip `count` of bytes and place cursor at new position.
 Get byte count from current cursor position to next occurrence of `value`.
 
 *value* - value to search. Can be either string or buffer, or one-byte number (0 - 255).
+
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
+
+## Writer
+
+Set of functions to write into new buffer. Unlike Reader, Writer is not a constructor.
+
+### Writer.Integer
+`Writer.Integer(value, length, {unsigned = false, littleEndian = false});`
+
+Create integer element.
+
+*value* - value to write.
+
+*length* - byte length in new buffer.
+
+*props.unsigned* - integer is unsigned.
+
+*props.littleEndian* - integer in little-endian format.
+
+### Writer.String
+`Writer.String(value, length = value.length, {encoding = 'utf8'});`
+
+Create string element.
+
+*value* - value to write.
+
+*length* - byte length in new buffer.
+
+*props.encoding* - text encoding.
+
+### Writer.Buffer
+`Writer.Buffer(value, length = value.length);`
+
+Create buffer element.
+
+*value* - value to write.
+
+*length* - byte length in new buffer.
+
+### Writer.Flags
+`Writer.Flags([values], length);`
+
+Create flags.
+
+*values* - array of values as bits.
+
+*length* - byte length in new buffer.
+
+### Writer.IndexOf
+`Writer.IndexOf(value, length, {unsigned = false, littleEndian = false});`
+
+Create reference to element's offset.
+
+*value* - element to reference.
+
+*length* - byte length in new buffer.
+
+*props.unsigned* - integer is unsigned.
+
+*props.littleEndian* - integer in little-endian format.
+
+### Writer.make
+`Writer.make([elements]);`
+
+Create buffer from elements. Array may consist of elements or other arrays. Nesting is supported.
+
+*elements* - elements to convert into buffer.
