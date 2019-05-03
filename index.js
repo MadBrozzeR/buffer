@@ -1,3 +1,4 @@
 module.exports = {
-  Reader: require('./reader.js')
+  Reader: require('./reader.js'),
+  Writer: require('./writer.js')
 };
