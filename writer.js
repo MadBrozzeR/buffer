@@ -118,16 +118,19 @@ Group.prototype.flatten = function (result = {value: [], length: 0}) {
     flatten(this.group[index], result);
   }
   this.length = result.length - this.offset;
-}
+};
 Group.prototype.SizeOf = function (length, params) {
   return new SizeOfType(this, length, params);
-}
+};
 Group.prototype.IndexOf = function (length, params) {
   return new IndexOfType(this, length, params);
-}
+};
+Group.prototype.push = function () {
+  this.group.push.apply(this.group, arguments);
+};
 Group.generator = function (group) {
   return new Group(group);
-}
+};
 
 function flatten (object, result = {value: [], length: 0}) {
   if (object instanceof Group) {
@@ -153,12 +156,6 @@ function make (object) {
   }
 
   return result;
-}
-
-function generator (className) {
-  return function (...args) {
-    return new className(...args);
-  }
 }
 
 module.exports = {

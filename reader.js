@@ -5,12 +5,21 @@ function Reader (buffer) {
   this.index = 0;
   this.encoding = UTF_8;
 }
+Reader.prototype.append = function (buffer) {
+  const length = this.buffer.length + buffer.length;
+  this.buffer = Buffer.concat([this.buffer, buffer], length);
+
+  return this;
+}
 Reader.prototype.shift = function (length) {
   const oldIndex = this.index;
   this.index += length;
 
   return oldIndex;
 }
+Reader.prototype.isEndReached = function () {
+  return this.index >= this.buffer.length;
+};
 Reader.prototype.readInt = function (length = 1, littleEndian = false, unsigned = false) {
   let method;
 
@@ -64,5 +73,27 @@ Reader.prototype.goTo = function (index) {
 
   return this;
 };
+Reader.extend = function () {
+  let constructor;
+  let methods;
+
+  if (arguments.length > 1) {
+    constructor = arguments[0];
+    methods = arguments[1];
+  } else {
+    methods = arguments[0];
+  }
+  constructor || (constructor = function CustomReader(buffer) {
+    Reader.call(this, buffer);
+  });
+  constructor.prototype = Object.create(Reader.prototype);
+  constructor.prototype.constructor = constructor;
+
+  if (methods) for (let name in methods) {
+    constructor.prototype[name] = methods[name];
+  }
+
+  return constructor;
+}
 
 module.exports = Reader;
