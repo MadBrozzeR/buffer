@@ -11,18 +11,30 @@ You are always free to extend it by methods reqired by your project.
 ```
 const reader = new Reader(buffer);
 ```
-### reader.slice
-`reader.slice(length)`
+### reader.append
+`reader.append(buffer)`
 
-Read length bytes from current cursor position into new buffer. Note that both buffers share the same place in memory
-so if one buffer has been modified then other one is modified as well.
+Append new data chunk to existing one without index being reset.
 
-*length* - byte count to read.
+*buffer* - new data chunk to be appended.
+
+Returns current Reader instance.
 
 ### reader.goTo
 `reader.goTo(index)`
 
 Move cursor so certain position.
+
+*index* - position to go to.
+
+Returns current Reader instance.
+
+### reader.isEndReached
+`reader.isEndReached()`
+
+Check if cursor reached the end of storing data.
+
+Returns `true` if end has been reached or `false` otherwise.
 
 ### reader.last
 `reader.last(value, encoding = reader.encoding)`
@@ -33,6 +45,8 @@ Get index of last occurrence of `value`.
 
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
 
+Returns index as number type.
+
 ### reader.next
 `reader.next(value, encoding = reader.encoding)`
 
@@ -41,6 +55,8 @@ Get index of next (after current cursor position) occurrence of `value`.
 *value* - value to search. Can be either string or buffer, or one-byte number (0 - 255).
 
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
+
+Returns index as number type.
 
 ### reader.read
 `reader.read(length = 1, encoding = reader.encoding)`
@@ -58,6 +74,8 @@ Read integer from `length` bytes starting from current cursor position.
 
 *unsigned* - is integer is unsigned.
 
+Returns number.
+
 ### reader.readIntBE, .readIntLE, .readUIntBE, readUIntLE
 ```
 reade.readIntBE(length = 1);  // Signed in big-endian byte direction
@@ -70,12 +88,35 @@ Read signed or unsigned integer in desired byte direction from `length` bytes st
 
 *length* - byte count to read from.
 
+Returns number.
+
+### reader.shft
+`reader.shift(count)`
+
+Move cursor by `count` of bytes, but return previous index value, unlike `.skip` method.
+
+*count* - count of bytes to move cursor by.
+
+Returns previous cursor position index as number type.
+
 ### reader.skip
 `reader.skip(count = 1)`
 
 Skip `count` of bytes and place cursor at new position.
 
 *count* - count of bytes to be skipped.
+
+Returns current Reader instance.
+
+### reader.slice
+`reader.slice(length)`
+
+Read length bytes from current cursor position into new buffer. Note that both buffers share the same place in memory
+so if one buffer has been modified then other one is modified as well.
+
+*length* - byte count to read.
+
+Returns new buffer object.
 
 ### reader.until
 `reader.until(value, encoding = reader.encoding)`
@@ -85,6 +126,45 @@ Get byte count from current cursor position to next occurrence of `value`.
 *value* - value to search. Can be either string or buffer, or one-byte number (0 - 255).
 
 *encoding* - encoding of string value type. If value is not of string type, then argument is ignored.
+
+Returns length as number.
+
+### Reader.extend (static method)
+`Reader.extend([constructor], methods)`
+
+Create new constructor as an extension of Reader.
+
+*constructor* - new constructor to extend Reader. Default one will be created if argument is omitted.
+
+*methods* - methods to be appended to new prototype.
+
+Returns new constructor function.
+
+Example:
+
+```
+// Extend base class with two new methods: `readStrNull` which reads string
+// from current cursor position until firs 0x00 byte and `readBase64` that
+// returns `length` of bytes as base64.
+const ExtendedReader1 = Reader.extend({
+  readStrNull: function () {
+    return this.read(this.until(0));
+  },
+  readBase64: function (length) {
+    return this.slice(length).toString('base64');
+  }
+});
+
+// Extend base class with custom constructor and `readAndAppendPrefix` method.
+const ExtendedReader2 = Reader.extend(function (buffer, prefix) {
+    Reader.call(this, buffer);
+    this.prefix = prefix;
+}, {
+    readAndAppendPrefix: function (length) {
+        return this.prefix + this.read(length);
+    }
+});
+```
 
 ## Writer
 
