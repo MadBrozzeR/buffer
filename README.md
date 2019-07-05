@@ -272,6 +272,17 @@ Create reference to element's size.
 `Writer.make([elements]);`
 
 Create buffer from elements. Array may consist of elements or other arrays. Nesting is supported.
+If element is not an instance of Array, Writer.Group or any extension of Writer.Element (BufferElement)
+then it will be ignored. So it is possible to use ternary operator to decide wether you need to include
+element in array (Group) or not:
+```
+[
+    ...
+    someCase ? Writer.String('Yes!') : null,
+    !!orSomeOtherCase && Writer.String('A-ha!')
+    ...
+]
+```
 
 *elements* - elements to convert into buffer.
 
