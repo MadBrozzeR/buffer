@@ -215,6 +215,15 @@ Create string element.
 
 *props.encoding* - text encoding.
 
+#### Writer.Fill
+`Writer.Fill(value = 0, length = 1);`
+
+Fill `length` bytes with given `value`s.
+
+*value* - value to write into each byte.
+
+*length* - count of bytes to be filled.
+
 ### Writer.Buffer
 `Writer.Buffer(value, length = value.length);`
 

@@ -55,12 +55,20 @@ const IntegerType = BufferElement.extend(function IntegerType (value, length = 1
 
 const StringType = BufferElement.extend(function StringType (value, length, params = {}) {
   this.encoding = params.encoding || UTF_8;
-  BufferElement.call(this, value, length  || Buffer.byteLength(value, this.encoding));
+  BufferElement.call(this, value, length || Buffer.byteLength(value, this.encoding));
 }, function () {
   const buffer = Buffer.alloc(this.length);
   buffer.write(this.value, this.encoding);
 
   return BufferElement.prototype.valueOf.call(this, buffer);
+});
+
+const FillType = BufferElement.extend(function FillType (value = 0, length = 1) {
+    BufferElement.call(this, value, length);
+}, function () {
+    const buffer = Buffer.alloc(this.length, this.value);
+
+    return BufferElement.prototype.valueOf.call(this, buffer);
 });
 
 const FlagsType = BufferElement.extend(function FlagsType (value, length = 1) {
@@ -162,6 +170,7 @@ module.exports = {
   Element: BufferElement,
   Integer: IntegerType.generator(),
   String: StringType.generator(),
+  Fill: FillType.generator(),
   Buffer: BufferType.generator(),
   Flags: FlagsType.generator(),
   IndexOf: IndexOfType.generator(),
