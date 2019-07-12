@@ -17,6 +17,11 @@ BufferElement.prototype.writeTo = function (buffer) {
 
   value.value.copy(buffer, this.offset);
 }
+BufferElement.prototype.is = function (description) {
+  this.description = description;
+
+  return this;
+}
 BufferElement.generator = function () {
   const Constructor = this;
 
@@ -152,6 +157,7 @@ function flatten (object, result = {value: [], length: 0}) {
     object.offset = result.length;
     result.length += object.length;
   }
+
   return result;
 }
 
@@ -177,5 +183,6 @@ module.exports = {
   SizeOf: SizeOfType.generator(),
   Group: Group.generator,
 
-  make: make
+  make: make,
+  flatten: flatten
 };
