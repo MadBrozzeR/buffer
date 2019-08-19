@@ -74,7 +74,7 @@ const FloatType = BufferElement.extend(function FloatType (value, params = {}) {
 });
 
 const DoubleType = BufferElement.extend(function DoubleType (value, params = {}) {
-  BufferElement.call(this, value, 4);
+  BufferElement.call(this, value, 8);
   this.littleEndian = params.littleEndian || false;
 }, function () {
   const buffer = Buffer.allocUnsafe(this.length);
@@ -205,6 +205,8 @@ function make (object) {
 module.exports = {
   Element: BufferElement,
   Integer: IntegerType.generator(),
+  Float: FloatType.generator(),
+  Double: DoubleType.generator(),
   String: StringType.generator(),
   Fill: FillType.generator(),
   Buffer: BufferType.generator(),

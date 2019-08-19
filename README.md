@@ -204,6 +204,24 @@ Create integer element.
 
 *props.littleEndian* - integer in little-endian format.
 
+### Writer.Float
+`Writer.Float(value, {littleEndian = false});`
+
+Create floating point element.
+
+*value* - float value to write.
+
+*props.littleEndian* - number in little-endian format.
+
+### Writer.Double
+`Writer.Double(value, {littleEndian = false});`
+
+Create double precision element.
+
+*value* - value to write.
+
+*props.littleEndian* - number in little-endian format.
+
 ### Writer.String
 `Writer.String(value, length = value.length, {encoding = 'utf8'});`
 
