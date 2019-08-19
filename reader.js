@@ -44,6 +44,22 @@ Reader.prototype.readUIntLE = function (length) {
   return this.readInt(length, true, true);
 };
 
+Reader.prototype.readFloatBE = function () {
+  return this.buffer.readFloatBE(this.shift(4));
+};
+
+Reader.prototype.readFloatLE = function () {
+  return this.buffer.readFloatLE(this.shift(4));
+};
+
+Reader.prototype.readDoubleBE = function () {
+  return this.buffer.readDoubleBE(this.shift(8));
+}
+
+Reader.prototype.readDoubleLE = function () {
+  return this.buffer.readDoubleLE(this.shift(8));
+}
+
 Reader.prototype.read = function (length = 1, encoding) {
   const oldIndex = this.shift(length);
 

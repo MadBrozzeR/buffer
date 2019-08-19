@@ -53,6 +53,36 @@ const IntegerType = BufferElement.extend(function IntegerType (value, length = 1
   return BufferElement.prototype.valueOf.call(this, buffer);
 });
 
+const FloatType = BufferElement.extend(function FloatType (value, params = {}) {
+  BufferElement.call(this, value, 4);
+  this.littleEndian = params.littleEndian || false;
+}, function () {
+  const buffer = Buffer.allocUnsafe(this.length);
+
+  if (this.littleEndian) {
+    buffer.writeFloatLE(this.value);
+  } else {
+    buffer.writeFloatBE(this.value);
+  }
+
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
+
+const DoubleType = BufferElement.extend(function DoubleType (value, params = {}) {
+  BufferElement.call(this, value, 4);
+  this.littleEndian = params.littleEndian || false;
+}, function () {
+  const buffer = Buffer.allocUnsafe(this.length);
+
+  if (this.littleEndian) {
+    buffer.writeDoubleLE(this.value);
+  } else {
+    buffer.writeDoubleBE(this.value);
+  }
+
+  return BufferElement.prototype.valueOf.call(this, buffer);
+});
+
 const StringType = BufferElement.extend(function StringType (value, length, params = {}) {
   this.encoding = params.encoding || UTF_8;
   BufferElement.call(this, value, length  || Buffer.byteLength(value, this.encoding));
