@@ -23,10 +23,22 @@ Reader.prototype.isEndReached = function () {
 Reader.prototype.readInt = function (length = 1, littleEndian = false, unsigned = false) {
   let method;
 
-  if (littleEndian) {
-    method = unsigned ? this.buffer.readUIntLE : this.buffer.readIntLE;
+  if (length === 8) {
+    if (!this.buffer.readBigUInt64LE) {
+      throw new Error('BigInt buffer methods is not supported. Consider upgrading NodeJS up to 12+');
+    }
+
+    if (littleEndian) {
+      method = unsigned ? this.buffer.readBigUInt64LE : this.buffer.readBigInt64LE;
+    } else {
+      method = unsigned ? this.buffer.readBigUInt64BE : this.buffer.readBigInt64BE;
+    }
   } else {
-    method = unsigned ? this.buffer.readUIntBE : this.buffer.readIntBE;
+    if (littleEndian) {
+      method = unsigned ? this.buffer.readUIntLE : this.buffer.readIntLE;
+    } else {
+      method = unsigned ? this.buffer.readUIntBE : this.buffer.readIntBE;
+    }
   }
 
   return method.call(this.buffer, this.shift(length), length);

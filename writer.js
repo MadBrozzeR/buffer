@@ -48,10 +48,22 @@ const IntegerType = BufferElement.extend(function IntegerType (value, length = 1
   const buffer = Buffer.allocUnsafe(this.length);
   let method;
 
-  if (this.unsigned) {
-    method = (this.littleEndian) ? buffer.writeUIntLE : buffer.writeUIntBE;
+  if (length === 8) {
+    if (!buffer.writeBigInt64LE) {
+      throw new Error('BigInt buffer methods is not supported. Consider upgrading NodeJS up to 12+');
+    }
+
+    if (this.unsigned) {
+      method = this.littleEndian ? buffer.writeBigUInt64LE : buffer.writeBigUInt64BE;
+    } else {
+      method = this.littleEndian ? buffer.writeBigInt64LE : buffer.writeBigInt64BE;
+    }
   } else {
-    method = (this.littleEndian) ? buffer.writeIntLE : buffer.writeIntBE;
+    if (this.unsigned) {
+      method = (this.littleEndian) ? buffer.writeUIntLE : buffer.writeUIntBE;
+    } else {
+      method = (this.littleEndian) ? buffer.writeIntLE : buffer.writeIntBE;
+    }
   }
   method.call(buffer, this.value, 0, this.length);
 
