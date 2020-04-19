@@ -48,7 +48,7 @@ const IntegerType = BufferElement.extend(function IntegerType (value, length = 1
   const buffer = Buffer.allocUnsafe(this.length);
   let method;
 
-  if (length === 8) {
+  if (this.length === 8) {
     if (!buffer.writeBigInt64LE) {
       throw new Error('BigInt buffer methods is not supported. Consider upgrading NodeJS up to 12+');
     }
