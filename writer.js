@@ -214,6 +214,23 @@ function make (object) {
   return result;
 }
 
+function debug (object) {
+  const flattenedObject = flatten(object);
+  let result = '';
+
+  for (let index = 0 ; index < flattenedObject.value.length ; ++index) {
+    const element = flattenedObject.value[index];
+    const value = element.valueOf();
+
+    result += value.value.toString('hex').replace(/(.{2})(?!$)/g, '$1 ') + '\n  ' +
+      element.constructor.name +
+      (element.description ? (' [' + element.description + ']') : '') + '\n    ' +
+      element.value + '\n';
+  }
+
+  return result;
+}
+
 module.exports = {
   Element: BufferElement,
   Integer: IntegerType.generator(),
@@ -228,5 +245,6 @@ module.exports = {
   Group: Group.generator,
 
   make: make,
-  flatten: flatten
+  flatten: flatten,
+  debug: debug,
 };
